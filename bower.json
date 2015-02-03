@@ -1,0 +1,22 @@
+{
+  "name": "cytoscape-supportimages",
+  "version": "1.0.0",
+  "description": "A plugin that enables support images on the graph.",
+  "main": "cytoscape-supportimages.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cytoscape.js-supportimages.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "cytoscape",
+    "cyext"
+  ],
+  "license": "MIT"
+}
