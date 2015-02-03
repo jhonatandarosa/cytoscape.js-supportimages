@@ -4,7 +4,7 @@ cytoscape-supportimages
 
 ## Description
 
-A plugin that enables support images on the graph.
+A plugin that enables support images on cytoscape.js
 
 
 ## Dependencies
