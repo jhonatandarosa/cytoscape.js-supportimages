@@ -13,7 +13,7 @@ Available functionalities:
  * change drawing order
  * change visibility
  * change locking (can be selected or moved)
- * resize
+ * resize (shift pressed when resizing keeps the image center, ctrl pressed when resizing keeps the aspect ratio)
 
 
 ## Dependencies
