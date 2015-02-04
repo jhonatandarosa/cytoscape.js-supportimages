@@ -6,12 +6,19 @@ cytoscape-supportimages
 
 A plugin that enables support images on cytoscape.js
 
+Available functionalities:
+ * add image
+ * remove image
+ * list images
+ * change drawing order
+ * change visibility
+ * change locking (can be selected or moved)
+ * resize
+
 
 ## Dependencies
 
- * Cytoscape.js >=x.y.z
- * <List your dependencies here please>
-
+ * Cytoscape.js >=2.3.8
 
 ## Usage instructions
 
@@ -42,31 +49,35 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-Please briefly describe your API here:
+
 
 ```js
-cy.supportimages({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
+// init/get the extension
+var si = cy.supportimages();
+
+// add a support image
+si.addSupportImage({
+	url: 'yourimageurl',
+	name: 'yourimagename'
 });
+
+// list images
+var imgs = si.images();
+
+var myImg = imgs[0];
+
+// set image locked
+si.setImageLocked(myImg, true);
+
+// set image visible
+si.setImageVisible(myImg, false);
+
+// move image up in the drawing order
+si.moveImageUp(myImg);
+
+// move image down in the drawing order
+si.moveImageDown(myImg);
+
+// remove image
+si.removeSupportImage(myImg);
 ```
-
-Or maybe if you have a collection extension:
-
-```js
-cy.elements().test({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
-});
-```
-
-
-## Publishing instructions
-
-This project is set up to automatically be published to npm and bower.  To publish:
-
-1. Set the version number environment variable: `export VERSION=1.2.3`
-1. Publish: `gulp publish`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-supportimages https://github.com/cytoscape.js-supportimages.git`

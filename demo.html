@@ -22,10 +22,10 @@
 			}
 
 			#cy {
-				width: 100%;
+				width: 80%;
 				height: 100%;
 				position: absolute;
-				left: 0;
+				left: 20%;
 				top: 0;
 				z-index: 999;
 			}
@@ -34,7 +34,102 @@
 				opacity: 0.5;
 				font-size: 1em;
 			}
+
+			#controls {
+				width: 20%;
+				height: 100%;
+				position: absolute;
+				left: 0;
+				top: 0;
+				z-index: 999;
+				background-color: lightgray;
+				border-right: 1px solid black;
+			}
 		</style>
+
+		<script>
+			function removeImg(id) {
+				var si = cy.supportimages();
+				var img = si.image(id);
+				si.removeSupportImage(img);
+				refreshImages();
+			}
+			function moveUp(id) {
+				var si = cy.supportimages();
+				var img = si.image(id);
+				si.moveImageUp(img);
+				refreshImages();
+			}
+
+			function moveDown(id) {
+				var si = cy.supportimages();
+				var img = si.image(id);
+				si.moveImageDown(img);
+				refreshImages();
+			}
+
+			function changeLock(id) {
+				var si = cy.supportimages();
+				var img = si.image(id);
+				si.setImageLocked(img, !img.locked);
+				refreshImages();
+			}
+
+			function changeVisibility(id) {
+				var si = cy.supportimages();
+				var img = si.image(id);
+				si.setImageVisible(img, !img.visible);
+				refreshImages();
+			}
+
+			function refreshImages() {
+				var si = cy.supportimages();
+				var imgs = si.images();
+				var html = "<ul>";
+				for (var i = 0; i < imgs.length; i++) {
+					var img = imgs[i];
+					html += "<li>";
+					html += img.name;
+					html += "(" + img.url + ")";
+					html += "<button onclick='changeLock(\""+img.id+"\")'>";
+					html += img.locked ? "Unlock" : "Lock";
+					html += "</button>"
+					html += "<button onclick='changeVisibility(\""+img.id+"\")'>";
+					html += img.visible ? "Hide" : "Show";
+					html += "</button>";
+
+					if (i > 0) {
+						html += "<button onclick='moveUp(\""+img.id+"\")'>Move Up</button>";
+					}
+
+					if (i + 1 < imgs.length) {
+						html += "<button onclick='moveDown(\""+img.id+"\")'>Move Down</button>";
+					}
+
+					html += "<button onclick='removeImg(\""+img.id+"\")'>Remove</button>";
+
+					html += "</li>";
+				}
+				html += "</ul>";
+
+				$('#images').html(html);
+			}
+
+			function addImage() {
+				var name = $('#name').val();
+				var url = $('#url').val();
+				if (url && name) {
+					var si = cy.supportimages();
+					si.addSupportImage({
+						name: name,
+						url:url
+					});
+					refreshImages();
+				} else {
+					alert('Url and name are required');
+				}
+			}
+		</script>
 
 		<script>
 			$(function(){
@@ -82,13 +177,14 @@
 					},
 				});
 
-				// call your extension here ...
+				// init the plugin
+				cy.supportimages();
 
-				// e.g. on the core
-				// cy.supportimages();
-
-				// e.g. on elements
-				// cy.elements().supportimages();
+				cy.supportimages().addSupportImage({
+					name: 'jquery',
+					url: 'http://howtodoinjava.com/wp-content/uploads/jquery_logo.png'
+				});
+				refreshImages();
 
 			});
 		</script>
@@ -98,6 +194,15 @@
 		<h1>cytoscape-supportimages demo</h1>
 
 		<div id="cy"></div>
+		<div id="controls">
+			<div style="padding:10px">
+				Name: <input id="name"></input><br/>
+				&nbsp;&nbsp;URL: <input id="url"></input><br/>
+				<button onclick="addImage()">Add</button>
+			</div>
+			<div id="images">
+			</div>
+		</div>
 
 	</body>
 

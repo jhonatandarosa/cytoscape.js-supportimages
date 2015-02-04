@@ -198,7 +198,7 @@
   };
   
   SupportImageCanvasRenderer.prototype.load = function() {
-    console.log('load');
+    //console.log('load');
   };
 
   SupportImageCanvasRenderer.prototype.projectIntoViewport = function(clientX, clientY) {
@@ -1014,7 +1014,7 @@
     if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
     // if you want a core extension
-    cytoscape('core', 'supportImages', function( options ){ // could use options object, but args are up to you
+    cytoscape('core', 'supportimages', function( options ){ // could use options object, but args are up to you
       var cy = this;
 
       if (cy._private.supportImageCore) {
