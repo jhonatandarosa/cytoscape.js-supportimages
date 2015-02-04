@@ -27,7 +27,7 @@
 
     this.x = this.x || 0;
     this.y = this.y || 0;
-  };
+  }
 
   Rectangle.prototype.containsPoint = function(x, y) {
     return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
@@ -50,8 +50,8 @@
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
           var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
           return v.toString(16);
-      })
-    };
+      });
+    }
 
     // Allow instantiation without the 'new' keyword
     if (!(this instanceof SupportImage)) {
@@ -87,7 +87,7 @@
     this.name = this.name || this.url;
 
     this.id = this.id || guid();
-  };
+  }
   
   SupportImage.prototype.selected = function(param) {
     if (param !== undefined) {
@@ -312,7 +312,6 @@
     var pixelRatio = options.forcedPxRatio === undefined ? this.getPixelRatio() : options.forcedPxRatio;
     var cy = r.data.cy;
     var supportImageExt = r.data.supportImageExt;
-    var data = r.data;
 
     var zoom = cy.zoom();
     var effectiveZoom = forcedZoom !== undefined ? forcedZoom : zoom;
@@ -367,16 +366,7 @@
   };
 
   SupportImageCanvasRenderer.prototype.drawResizeControls = function(context, supportImage) {
-    var r = this;
     var supportImageExt = this.data.supportImageExt;
-    
-    var x = supportImage.bounds.x;
-    var y = supportImage.bounds.y;
-    var w = supportImage.bounds.width;
-    var h = supportImage.bounds.height;
-    
-    var cw = 5;//control width;
-    var ch = 5;//control height
     
     context.beginPath();
     var resizeControls = supportImageExt.resizeControls();
@@ -384,24 +374,7 @@
       var control = resizeControls[i];
       context.rect(control.x, control.y, control.width, control.height);
     }
-    /*
-    // top-left
-    context.rect(x-cw/2, y-ch/2, cw, ch);
-    // top-middle
-    context.rect(x+w/2-cw/2, y-ch/2, cw, ch);
-    // top-right
-    context.rect(x+w-cw/2, y-ch/2, cw, ch);
-    // bottom-left
-    context.rect(x-cw/2, y+h-ch/2, cw, ch);
-    // bottom-middle
-    context.rect(x+w/2-cw/2, y+h-ch/2, cw, ch);
-    // bottom-right
-    context.rect(x+w-cw/2, y+h-ch/2, cw, ch);
-    // middle-left
-    context.rect(x-cw/2, y+h/2-ch/2, cw, ch);
-    // middle-right
-    context.rect(x+w-cw/2, y+h/2-ch/2, cw, ch);
-    */
+
     context.fillStyle = 'lightgray';
     context.fill();
     context.stroke();
@@ -448,7 +421,7 @@
 
 
   // Extension core
-  var SupportImageExtension = (function(){ 'use strict';
+  var SupportImageExtension = (function(){
 
     // helper function
     function bindEvent(supportImageExt, eventName, handler) {
@@ -483,10 +456,10 @@
         
         return handler(evt);
       });
-    };
+    }
 
-    function initRenderer(options) {
-      var supportImageExt = this;
+    function initRenderer(supportImageExt, options) {
+      
       var cy = supportImageExt._private.cy;
       var container = cy.container();
 
@@ -498,46 +471,44 @@
         return;
       }
       
-      this._private.renderer = new RendererProto(cytoscape.util.extend({}, options, {
+      supportImageExt._private.renderer = new RendererProto(cytoscape.util.extend({}, options, {
         supportImageExt: supportImageExt,
         cy : cy
       }));
       
       // auto resize
-      var r = this._private.renderer;
+      var r = supportImageExt._private.renderer;
       r.registerBinding(window, 'resize', cytoscape.util.debounce( function(e) {
         r.invalidateContainerClientCoordsCache();
         r.matchCanvasSize(r.data.container);
         r.redraw();
       }, 100 ) );
 
-    };
+    }
 
-    function init() {
-      initRenderer.apply(this);
+    function init(supportImageExt) {
+      initRenderer.apply(null, [supportImageExt]);
       
-      var r = this._private.renderer;
-      var cy = this._private.cy;
-      var self = this;
+      var cy = supportImageExt._private.cy;
       
       cy.on('load', function() {
-        self.notify({type: 'load'});
+        supportImageExt.notify({type: 'load'});
       });
       cy.on('pan', function() {
-        self.notify({type: 'pan'});
+        supportImageExt.notify({type: 'pan'});
       });
       cy.on('zoom', function() {
-        var img = self.selectedImage();
+        var img = supportImageExt.selectedImage();
         if (img) {
-          updateResizeControls(self, img);
+          updateResizeControls(supportImageExt, img);
         }
-        self.notify({type: 'zoom'});
+        supportImageExt.notify({type: 'zoom'});
       });
       
-      registerMouseHandlers.apply(this);
-    };
-    function registerMouseHandlers() {
-      var cy = this._private.cy;
+      registerMouseHandlers.apply(null, [supportImageExt]);
+    }
+
+    function registerMouseHandlers(supportImageExt) {
       
       function getMousePosition(evt) {
         return {
@@ -561,7 +532,7 @@
         cy.userPanningEnabled(cyState.userPanningEnabled);
       }
       
-      bindEvent(this, 'mousedown', function(evt, item){
+      bindEvent(supportImageExt, 'mousedown', function(evt, item){
         var cy = evt.cy;
         evtState.mouseDown = true;
         evtState.mousePosition = getMousePosition(evt);
@@ -607,7 +578,7 @@
         // console.log(image);
       });
       
-      bindEvent(this, 'mouseup', function(evt, item) {
+      bindEvent(supportImageExt, 'mouseup', function(evt, item) {
         var cy = evt.cy;
         evtState.mouseDown = false;
         evtState.mousePosition = getMousePosition(evt);
@@ -624,7 +595,7 @@
         evtState.resizeControl = null;
       });
       
-      bindEvent(this, 'mousemove', function(evt, item) {
+      bindEvent(supportImageExt, 'mousemove', function(evt, item) {
         if (evtState.image) {
           evtState.image.dragging(true);
           
@@ -780,7 +751,7 @@
         }
         evtState.mousePosition = getMousePosition(evt);
       });
-    };
+    }
 
     function updateResizeControls(supportImageExt, supportImage) {
       var x = supportImage.bounds.x;
@@ -813,7 +784,7 @@
       resizeControls[6].set(x-cw/2, y+h/2-ch/2, cw, ch);
       // middle-right
       resizeControls[7].set(x+w-cw/2, y+h/2-ch/2, cw, ch);
-    };
+    }
 
     function SupportImageExtension(options) {
       // Allow instantiation without the 'new' keyword
@@ -825,8 +796,8 @@
       
       var baseControl = {x:0, y: 0, width:5, height:5};
       this._private = {
-        supportImages : new Array(),
-        resizeControls : new Array(),
+        supportImages : [],
+        resizeControls : [],
         cy: options.cy
       };
       
@@ -835,8 +806,8 @@
         this.resizeControls().push(new Rectangle(cytoscape.util.extend(baseControl, {id:ids[i]})));
       }
 
-      init.apply(this);
-    };
+      init.apply(null,[this]);
+    }
 
     SupportImageExtension.prototype.load = function(json) {
       if (typeof json === 'string') {
@@ -878,7 +849,6 @@
       
     SupportImageExtension.prototype.notify = function(params) {
       var r = this._private.renderer;
-      var cy = this._private.cy;
       
       r.notify(params);
     };
@@ -995,9 +965,9 @@
       var imgs = [];
       var images = this.images();
       for (var i = 0; i < images.length; i++) {
-        var img = images[i]
+        var img = images[i];
         imgs.push(img.json());
-      };
+      }
       var selected = this.selectedImage();
       var selectedId = selected ? selected.id : undefined;
       return {
