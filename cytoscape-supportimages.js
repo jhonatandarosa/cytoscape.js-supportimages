@@ -40,6 +40,10 @@
     this.height = h;
   };
 
+  Rectangle.prototype.equals = function(rect) {
+    return this.x == rect.x && this.y == rect.y && this.width == rect.width && this.height == rect.height;
+  };
+
   // Support Image class
   function SupportImage(props) {
     if (props === undefined && this instanceof SupportImage) {
@@ -511,9 +515,10 @@
     function registerMouseHandlers(supportImageExt) {
       
       function getMousePosition(evt) {
+        //console.log(evt);
         return {
-          x: evt.originalEvent.x,
-          y: evt.originalEvent.y
+          x: evt.cyRenderedPosition.x,
+          y: evt.cyRenderedPosition.y
         };
       }
       var evtState = {};
@@ -558,6 +563,7 @@
             updateResizeControls(evt.supportImageExt, item);
             
             evtState.image = item;
+            evtState.imgBounds = cytoscape.util.extend({}, item.bounds);
             evt.supportImageExt.notify({type:'selection'});
           } else if (item instanceof Rectangle){//resize control
             evtState.resizeControl = item;
@@ -590,12 +596,42 @@
         
         if (evtState.image) {
           evtState.image.dragging(false);
+          if (evtState.imgBounds) {
+            var b1 = evtState.imgBounds;
+            var b2 = evtState.image.bounds;
+            if (!b2.equals(b1)) {
+              cy.trigger('cysupportimages.imagemoved',
+                [
+                  evtState.image,
+                  b1,
+                  b2
+                ]
+              );
+            }
+          }
+        }
+        if (evtState.resizeControl) {
+          if (evtState.imgBounds) {
+            var b1 = evtState.imgBounds;
+            var img = supportImageExt.selectedImage();
+            var b2 = img.bounds;
+            if (!b2.equals(b1)) {
+              cy.trigger('cysupportimages.imageresized',
+                [
+                  img,
+                  b1,
+                  b2
+                ]
+              );
+            }
+          }
         }
         evtState.image = null;
         evtState.resizeControl = null;
       });
       
       bindEvent(supportImageExt, 'mousemove', function(evt, item) {
+        
         if (evtState.image) {
           evtState.image.dragging(true);
           
@@ -827,6 +863,14 @@
         }
       }
     };
+
+    SupportImageExtension.prototype.render = function() {
+      var img = this.selectedImage();
+      if (img) {
+        updateResizeControls(this, img);
+      }
+      this._private.renderer.notify({type: 'render'});
+    }
 
     SupportImageExtension.prototype.resizeControls = function() {
       return this._private.resizeControls;
