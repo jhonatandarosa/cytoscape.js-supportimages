@@ -3,8 +3,7 @@
  *
  * AUTHOR: Jhonatan da Rosa
  */
-;(function () {
-    'use strict';
+;(function(){ 'use strict';
 
     var debounce = (function () {
         /**
@@ -287,9 +286,9 @@
     function Rectangle(props) {
         if (props === undefined && this instanceof Rectangle) {
             return new Rectangle({
-                x: this.x,
-                y: this.y,
-                width: this.width,
+                x     : this.x,
+                y     : this.y,
+                width : this.width,
                 height: this.height,
             });
         }
@@ -307,37 +306,37 @@
         this.y = this.y || 0;
     }
 
-    Rectangle.prototype.containsPoint = function (x, y) {
+    Rectangle.prototype.containsPoint = function(x, y) {
         return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
     };
 
-    Rectangle.prototype.set = function (x, y, w, h) {
+    Rectangle.prototype.set = function(x, y, w, h) {
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
     };
 
-    Rectangle.prototype.equals = function (rect) {
+    Rectangle.prototype.equals = function(rect) {
         return this.x == rect.x && this.y == rect.y && this.width == rect.width && this.height == rect.height;
     };
 
     // Support Image class
-    function SupportImage(props) {
+    function SupportImage(core, props) {
         if (props === undefined && this instanceof SupportImage) {
             // called object.constructor();
-            return new SupportImage(this.json());
+            return new SupportImage(core, this.json());
         }
         function guid() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
                 return v.toString(16);
             });
         }
 
         // Allow instantiation without the 'new' keyword
         if (!(this instanceof SupportImage)) {
-            return new SupportImage(props);
+            return new SupportImage(core, props);
         }
         if (typeof props === 'string') {
             props = {url: props};
@@ -354,6 +353,7 @@
         }
 
         this._private = this._private || {};
+        this._private.core = core;
 
         // create default variables
         if (this.bounds) {
@@ -371,7 +371,35 @@
         this.id = this.id || guid();
     }
 
-    SupportImage.prototype.selected = function (param) {
+    SupportImage.prototype.position = function() {
+        return {
+            x: this.bounds.x + this.bounds.width / 2,
+            y: this.bounds.y + this.bounds.height / 2
+        };
+    };
+
+    SupportImage.prototype.renderedPosition = function() {
+        var core = this._private.core;
+        var r = core.renderer();
+
+        var x = this.bounds.x;
+        var y = this.bounds.y;
+
+        var zoom = r.data.cy.zoom();
+        var pan = r.data.cy.pan();
+        x = x * zoom + pan.x;
+        y = y * zoom + pan.y;
+
+        var w = this.bounds.width * zoom;
+        var h = this.bounds.height * zoom;
+
+        return {
+            x: x + w/2,
+            y: y + h/2
+        };
+    };
+
+    SupportImage.prototype.selected = function(param) {
         if (param !== undefined) {
             this._private.selected = param;
         } else {
@@ -379,7 +407,7 @@
         }
     };
 
-    SupportImage.prototype.dragging = function (param) {
+    SupportImage.prototype.dragging = function(param) {
         if (param !== undefined) {
             this._private.dragging = param;
         } else {
@@ -387,17 +415,17 @@
         }
     };
 
-    SupportImage.prototype.json = function () {
+    SupportImage.prototype.json = function() {
         return {
-            id: this.id,
-            url: this.url,
-            name: this.name,
-            locked: this.locked,
+            id     : this.id,
+            url    : this.url,
+            name   : this.name,
+            locked : this.locked,
             visible: this.visible,
-            bounds: {
-                x: this.bounds.x,
-                y: this.bounds.y,
-                width: this.bounds.width,
+            bounds : {
+                x     : this.bounds.x,
+                y     : this.bounds.y,
+                width : this.bounds.width,
                 height: this.bounds.height,
 
             }
@@ -439,9 +467,9 @@
 
 
     // RENDERER
-    SupportImageCanvasRenderer.prototype.notify = function (params) {
+    SupportImageCanvasRenderer.prototype.notify = function(params) {
         //console.log(params);
-        switch (params.type) {
+        switch( params.type ) {
 
             case 'destroy':
                 this.destroy();
@@ -457,7 +485,7 @@
         this.redraw();
     };
 
-    SupportImageCanvasRenderer.prototype.destroy = function () {
+    SupportImageCanvasRenderer.prototype.destroy = function() {
         this.destroyed = true;
 
         for (var i = 0; i < this.bindings.length; i++) {
@@ -468,22 +496,22 @@
         }
     };
 
-    SupportImageCanvasRenderer.prototype.registerBinding = function (target, event, handler, useCapture) {
+    SupportImageCanvasRenderer.prototype.registerBinding = function(target, event, handler, useCapture) {
         this.bindings.push({
-            target: target,
-            event: event,
-            handler: handler,
-            useCapture: useCapture
+            target : target,
+            event : event,
+            handler : handler,
+            useCapture : useCapture
         });
 
         target.addEventListener(event, handler, useCapture);
     };
 
-    SupportImageCanvasRenderer.prototype.load = function () {
+    SupportImageCanvasRenderer.prototype.load = function() {
         //console.log('load');
     };
 
-    SupportImageCanvasRenderer.prototype.projectIntoViewport = function (clientX, clientY) {
+    SupportImageCanvasRenderer.prototype.projectIntoViewport = function(clientX, clientY) {
         var offsets = this.findContainerClientCoords();
         var offsetLeft = offsets[0];
         var offsetTop = offsets[1];
@@ -498,7 +526,7 @@
         return [x, y];
     };
 
-    SupportImageCanvasRenderer.prototype.findContainerClientCoords = function () {
+    SupportImageCanvasRenderer.prototype.findContainerClientCoords = function() {
         var container = this.data.container;
 
         var bb = this.containerBB = this.containerBB || container.getBoundingClientRect();
@@ -506,13 +534,13 @@
         return [bb.left, bb.top, bb.right - bb.left, bb.bottom - bb.top];
     };
 
-    SupportImageCanvasRenderer.prototype.invalidateContainerClientCoordsCache = function () {
+    SupportImageCanvasRenderer.prototype.invalidateContainerClientCoordsCache = function() {
         this.containerBB = null;
     };
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
 
-    SupportImageCanvasRenderer.prototype.getPixelRatio = function () {
+    SupportImageCanvasRenderer.prototype.getPixelRatio = function(){
         var context = this.data.context;
 
         var backingStore = context.backingStorePixelRatio ||
@@ -522,7 +550,7 @@
             context.oBackingStorePixelRatio ||
             context.backingStorePixelRatio || 1;
 
-        if (isFirefox) { // because ff can't scale canvas properly
+        if( isFirefox ){ // because ff can't scale canvas properly
             return 1;
         }
 
@@ -530,7 +558,7 @@
     };
 
     // Resize canvas
-    SupportImageCanvasRenderer.prototype.matchCanvasSize = function (container) {
+    SupportImageCanvasRenderer.prototype.matchCanvasSize = function(container) {
         var data = this.data;
         var width = container.clientWidth;
         var height = container.clientHeight;
@@ -567,7 +595,7 @@
     };
 
 
-    SupportImageCanvasRenderer.prototype.getCachedImage = function (url, onLoad) {
+    SupportImageCanvasRenderer.prototype.getCachedImage = function(url, onLoad) {
         var r = this;
         var imageCache = r.imageCache = r.imageCache || {};
 
@@ -585,7 +613,7 @@
     };
 
 
-    SupportImageCanvasRenderer.prototype.redraw = function (options) {
+    SupportImageCanvasRenderer.prototype.redraw = function(options) {
         options = options || {};
 
         var forcedZoom = options.forcedZoom;
@@ -599,8 +627,8 @@
         var effectiveZoom = forcedZoom !== undefined ? forcedZoom : zoom;
         var pan = cy.pan();
         var effectivePan = {
-            x: pan.x,
-            y: pan.y
+            x : pan.x,
+            y : pan.y
         };
 
         if (forcedPan) {
@@ -647,7 +675,7 @@
 
     };
 
-    SupportImageCanvasRenderer.prototype.drawResizeControls = function (context, supportImage) {
+    SupportImageCanvasRenderer.prototype.drawResizeControls = function(context, supportImage) {
         var supportImageExt = this.data.supportImageExt;
 
         context.beginPath();
@@ -662,11 +690,11 @@
         context.stroke();
     };
 
-    SupportImageCanvasRenderer.prototype.drawSupportImage = function (context, supportImage) {
+    SupportImageCanvasRenderer.prototype.drawSupportImage = function(context, supportImage) {
         var r = this;
 
         // get image, and if not loaded then ask to redraw when later loaded
-        var img = this.getCachedImage(supportImage.url, function (evt) {
+        var img = this.getCachedImage(supportImage.url, function(evt) {
             var resource = evt.currentTarget;
             var w = resource.width;
             var h = resource.height;
@@ -703,15 +731,18 @@
 
 
     // Extension core
-    var SupportImageExtension = (function () {
+    var SupportImageExtension = (function(){
 
         // helper function
         function bindEvent(supportImageExt, eventName, handler) {
             var cy = supportImageExt._private.cy;
 
-            cy.on(eventName, function (evt) {
+            cy.on(eventName, function(evt) {
+
+                if (evt.isPropagationStopped && evt.isPropagationStopped()) return;
+
                 evt.supportImageExt = supportImageExt;
-                if (!(evt.cyTarget == cy)) {
+                if (evt.cyTarget !== evt.cy) { // is not the core
                     return handler(evt);
                 }
 
@@ -719,12 +750,13 @@
                 var resizeControls = supportImageExt.resizeControls();
                 var pos = evt.cyPosition;
 
-                // TODO: refactoring to make this check only when an image is selected
-                var idx, len;
-                for (idx = 0, len = resizeControls.length; idx < len; ++idx) {
-                    var control = resizeControls[idx];
-                    if (control.containsPoint(pos.x, pos.y)) {
-                        return handler(evt, control);
+                if (supportImageExt.selectedImage()){
+                    var idx, len;
+                    for (idx = 0, len = resizeControls.length; idx < len; ++idx) {
+                        var control = resizeControls[idx];
+                        if (control.containsPoint(pos.x, pos.y)) {
+                            return handler(evt, control);
+                        }
                     }
                 }
 
@@ -745,7 +777,7 @@
             var cy = supportImageExt._private.cy;
             var container = cy.container();
 
-            options = extend({name: window && container ? 'canvas' : 'null'}, options);
+            options = extend({ name : window && container ? 'canvas' : 'null' }, options);
 
             var RendererProto = SupportImageCanvasRenderer;
             if (RendererProto == null) {
@@ -755,7 +787,7 @@
 
             supportImageExt._private.renderer = new RendererProto(extend({}, options, {
                 supportImageExt: supportImageExt,
-                cy: cy
+                cy : cy
             }));
 
             // auto resize
@@ -773,13 +805,13 @@
 
             var cy = supportImageExt._private.cy;
 
-            cy.on('load initrender', function () {
+            cy.on('load initrender', function() {
                 supportImageExt.notify({type: 'load'});
             });
-            cy.on('pan', function () {
+            cy.on('pan', function() {
                 supportImageExt.notify({type: 'pan'});
             });
-            cy.on('zoom', function () {
+            cy.on('zoom', function() {
                 var img = supportImageExt.selectedImage();
                 if (img) {
                     updateResizeControls(supportImageExt, img);
@@ -799,53 +831,82 @@
                     y: evt.cyRenderedPosition.y
                 };
             }
-
-            var evtState = {};
+            var evtState = supportImageExt._private.evtState;
 
             function saveCytoscapeState(cy) {
                 var cyState = {
-                    boxSelectionEnabled: cy.boxSelectionEnabled(),
-                    userPanningEnabled: cy.userPanningEnabled(),
+                    gabrifyEnabled : cy.autoungrabify(),
+                    unselectifyEnabled : cy.autounselectify(),
+                    boxSelectionEnabled : cy.boxSelectionEnabled(),
+                    userPanningEnabled : cy.userPanningEnabled(),
+                    panningEnabled : cy.panningEnabled(),
+                    selectedElements : cy.elements(':selected')
                 };
                 evtState.cyState = cyState;
             }
 
             function restoreCytoscapeState(cy) {
-                var cyState = evtState.cyState;
-                cy.boxSelectionEnabled(cyState.boxSelectionEnabled);
-                cy.userPanningEnabled(cyState.userPanningEnabled);
+
+                // Always restore if any
+                if (evtState.cyState){
+                    var cyState = evtState.cyState;
+                    cy.boxSelectionEnabled(cyState.boxSelectionEnabled);
+                    cy.userPanningEnabled(cyState.userPanningEnabled);
+                    cy.panningEnabled(cyState.panningEnabled);
+                    cy.autoungrabify(cyState.gabrifyEnabled);
+                    cy.autounselectify(cyState.unselectifyEnabled);
+                    cy.elements().each(function(i, ele){
+                        if (cyState.selectedElements.anySame(ele)){
+                            ele.select();
+                        }
+                    });
+
+                    // Restore just once
+                    evtState.cyState = null;
+                }
             }
 
-            bindEvent(supportImageExt, 'mousedown', function (evt, item) {
+            bindEvent(supportImageExt, 'mousedown', function(evt, item){
+
                 var cy = evt.cy;
                 evtState.mouseDown = true;
                 evtState.mousePosition = getMousePosition(evt);
-                saveCytoscapeState(cy);
 
+                var isPanEnabled = (cy.autoungrabify() && cy.panningEnabled() && (!cy.elements().selectable() || cy.elements().selectable() === undefined));
+                var isAreaZoomEnabled = (cy.autoungrabify() && !cy.panningEnabled() && (!cy.elements().selectable() || cy.elements().selectable() === undefined));
 
-                if (item) {
+                if (item && !isPanEnabled && !isAreaZoomEnabled) {
+
                     evt.stopPropagation();
+                    saveCytoscapeState(cy);
 
                     cy.boxSelectionEnabled(false);
+                    cy.elements().unselect();
+                    cy.autoungrabify(true);
+                    cy.autounselectify(true);
                     cy.userPanningEnabled(false);
+                    cy.panningEnabled(false);
 
                     if (item instanceof SupportImage) {
+
                         evt.supportImageExt.clearSelection();
                         evtState.resizeControl = null;
-                        if (evtState.image) {
-                            evtState.image.selected(false);
-                            evtState.image.dragging(false);
-                        }
 
-                        item.selected(true);
-                        cy.trigger('supportimage.selection', [item]);
-                        updateResizeControls(evt.supportImageExt, item);
+                        evt.supportImageExt.selectImage(item);
+                        item.dragging(true);
 
-                        evtState.image = item;
-                        evtState.imgBounds = extend({}, item.bounds);
-                        evt.supportImageExt.notify({type: 'selection'});
-                    } else if (item instanceof Rectangle) {//resize control
+                    } else if (item instanceof Rectangle){//resize control
+                        evtState.image = null;
+                        changePointerResizeControl(item.id);
                         evtState.resizeControl = item;
+                        evtState.imageState = {
+                            width : evt.supportImageExt.selectedImage().bounds.width,
+                            height : evt.supportImageExt.selectedImage().bounds.height,
+                            x : evt.supportImageExt.selectedImage().bounds.x,
+                            y : evt.supportImageExt.selectedImage().bounds.y,
+                            ctrlKey : evt.originalEvent.ctrlKey,
+                            shiftKey : evt.originalEvent.shiftKey
+                        }
                     } else {
                         console.error('Unknown object detected: ' + item);
                     }
@@ -853,25 +914,22 @@
                 } else {
                     evt.supportImageExt.clearSelection();
                     evtState.resizeControl = null;
-                    if (evtState.image) {
-                        evtState.image.selected(false);
-                        evtState.image.dragging(false);
-                    }
                 }
 
                 // console.log('mouse down');
                 // console.log(image);
             });
 
-            bindEvent(supportImageExt, 'mouseup', function (evt, item) {
+            bindEvent(supportImageExt, 'mouseup', function(evt, item) {
                 var cy = evt.cy;
                 evtState.mouseDown = false;
                 evtState.mousePosition = getMousePosition(evt);
+                changePointerResizeControl('');
 
                 restoreCytoscapeState(cy);
 
-                // console.log('mouse up');
-                // console.log(image);
+                console.log('mouse up');
+                console.log(evtState.image);
 
                 if (evtState.image) {
                     evtState.image.dragging(false);
@@ -909,10 +967,21 @@
                 evtState.resizeControl = null;
             });
 
-            bindEvent(supportImageExt, 'mousemove', function (evt, item) {
+            bindEvent(supportImageExt, 'mousemove', function(evt, item) {
 
-                if (evtState.image) {
-                    evtState.image.dragging(true);
+                // Se não for evento de resize é somente mouseover
+                if (!evtState.resizeControl){
+                    if (item instanceof Rectangle){
+                        //Mouseover
+                        changePointerResizeControl(item.id);
+                    }else{
+                        //Mouseout
+                        changePointerResizeControl('');
+                    }
+                }
+
+                if (evtState.image && evtState.image.dragging()) {
+                    // evtState.image.dragging(true);
 
                     var lastMousePos = evtState.mousePosition;
                     var currMousePos = getMousePosition(evt);
@@ -924,9 +993,10 @@
                     evtState.image.bounds.x += p2[0] - p1[0];
                     evtState.image.bounds.y += p2[1] - p1[1];
                     updateResizeControls(evt.supportImageExt, evtState.image);
-                    evt.supportImageExt.notify({type: 'position'});
+                    evt.supportImageExt.notify({type:'position'});
 
                 } else if (evtState.resizeControl) {
+
                     var control = evtState.resizeControl;
 
                     var lastMousePos = evtState.mousePosition;
@@ -942,13 +1012,46 @@
                     var keepAspectRatio = evt.originalEvent.ctrlKey;
                     var keepAxis = evt.originalEvent.shiftKey;
 
-                    var factorX = selected.resourceW / selected.resourceH;
-                    var factorY = selected.resourceH / selected.resourceW;
+                    if (evtState.imageState.ctrlKey != keepAspectRatio){
+                        evtState.imageState.ctrlKey = keepAspectRatio;
+                        evtState.imageState.width = bounds.width;
+                        evtState.imageState.height = bounds.height;
+                        evtState.imageState.x = bounds.x;
+                        evtState.imageState.y = bounds.y;
+                    }
+
+                    if (evtState.imageState.shiftKey != keepAxis){
+                        evtState.imageState.shiftKey = keepAxis;
+                        evtState.imageState.width = bounds.width;
+                        evtState.imageState.height = bounds.height;
+                        evtState.imageState.x = bounds.x;
+                        evtState.imageState.y = bounds.y;
+                    }
+
+                    var factorX = evtState.imageState.width / evtState.imageState.height;
+                    var factorY = evtState.imageState.height / evtState.imageState.width;
+
                     var dx = p2[0] - p1[0];
                     var dy = p2[1] - p1[1];
 
-                    switch (control.id) {
+                    // 10 for Width or Height
+                    var minimumImageSize = (control.width * 2);
+                    // size - 1 (from margin)
+                    var boundPadding = (control.width * 2) - 1;
+
+                    var limits = findLimits(//
+                        evt.supportImageExt, //
+                        {//
+                            x : evtState.imageState.x,//
+                            y : evtState.imageState.y, //
+                            h : evtState.imageState.height,//
+                            w : evtState.imageState.width//
+                        });
+
+                    switch(control.id) {
+
                         case 'tl':
+
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
                                 var fx = d == dx ? 1 : factorX;
@@ -957,21 +1060,58 @@
                                 dx = d * fx;
                                 dy = d * fy;
                             }
-                            bounds.x += dx;
-                            bounds.y += dy;
-                            bounds.width -= keepAxis ? dx * 2 : dx;
-                            bounds.height -= keepAxis ? dy * 2 : dy;
+
+                            bounds.width -= (keepAxis ? dx*2 : dx);
+                            bounds.height -= (keepAxis ? dy*2 : dy);
+
+                            var newBoundX =  (bounds.x + dx);
+                            var newBoundY =  (bounds.y + dy);
+                            if (!keepAxis){
+
+                                if ((newBoundX + boundPadding) > limits.bottomRight.x){
+                                    newBoundX = (limits.bottomRight.x - boundPadding);
+                                }
+                                bounds.x = newBoundX;
+
+                                if ((newBoundY + boundPadding) > limits.bottomRight.y){
+                                    newBoundY = (limits.bottomRight.y - boundPadding);
+                                }
+                                bounds.y = newBoundY;
+
+                            }else{
+                                bounds.y = (bounds.height > minimumImageSize) ? newBoundY : limits.center.y;
+                                bounds.x = (bounds.width > minimumImageSize) ? newBoundX : limits.center.x;
+                            }
+
                             break;
+
                         case 'tm':
-                            bounds.y += dy;
-                            bounds.height -= keepAxis ? dy * 2 : dy;
-                            if (keepAspectRatio) {
-                                dy = keepAxis ? dy * 2 : dy;
-                                bounds.x += dy * factorX * 0.5;
-                                bounds.width -= dy * factorX;
+
+                            bounds.height -= (keepAxis ? dy*2 : dy);
+
+                            var newBoundY =  (bounds.y + dy);
+                            if (bounds.height < minimumImageSize){
+                                newBoundY = (keepAxis) ? limits.center.y : (limits.bottomMiddle.y - boundPadding);
                             }
+                            bounds.y = newBoundY;
+
+                            if (keepAspectRatio) {
+
+                                dy = keepAxis ? dy*2 : dy;
+                                bounds.width -= (dy * factorX);
+
+                                var newBoundX = (bounds.x + (dy * factorX * 0.5));
+                                if (bounds.width < minimumImageSize && bounds.height < minimumImageSize){
+                                    newBoundX = limits.bottomMiddle.x;
+                                }
+                                bounds.x = newBoundX;
+
+                            }
+
                             break;
+
                         case 'tr':
+
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
                                 var fx = d == dx ? 1 : -factorX;
@@ -981,14 +1121,26 @@
                                 dy = d * fy;
                             }
 
-                            bounds.width += keepAspectRatio && keepAxis ? dx * 2 : dx;
-                            bounds.y += dy;
-                            bounds.height -= keepAxis ? dy * 2 : dy;
-                            if (keepAxis) {
-                                bounds.x -= keepAspectRatio ? dx : dx * 0.5;
+                            bounds.width += ((keepAspectRatio && keepAxis) ? dx*2 : dx);
+                            bounds.height -= (keepAxis ? dy*2: dy);
+
+                            var newBoundX = (bounds.x - (keepAspectRatio ? dx : dx * 0.5));
+                            var newBoundY = bounds.y + dy;
+
+                            if (!keepAxis){
+                                if ((newBoundY + boundPadding) > limits.bottomLeft.y ){
+                                    newBoundY = (limits.bottomLeft.y - boundPadding);
+                                }
+                                bounds.y = newBoundY ;
+                            }else{
+                                bounds.y = (bounds.height > minimumImageSize) ? newBoundY : limits.center.y;
+                                bounds.x = (bounds.width > minimumImageSize) ? newBoundX : limits.center.x;
                             }
+
                             break;
+
                         case 'bl':
+
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
                                 var fx = d == dx ? 1 : -factorX;
@@ -997,26 +1149,53 @@
                                 dx = d * fx;
                                 dy = d * fy;
                             }
-                            bounds.x += dx;
-                            bounds.width -= keepAxis ? dx * 2 : dx;
-                            bounds.height += keepAspectRatio && keepAxis ? dy * 2 : dy;
-                            if (keepAxis) {
-                                bounds.y -= keepAspectRatio ? dy : dy * 0.5;
+
+                            bounds.width -= (keepAxis ? dx*2 : dx);
+                            bounds.height += ((keepAspectRatio && keepAxis) ? dy*2 : dy);
+
+                            var newBoundX = bounds.x + dx;
+                            if (!keepAxis){
+                                if ((newBoundX + boundPadding) > limits.topRight.x){
+                                    newBoundX = (limits.topRight.x - boundPadding);
+                                }
+                                bounds.x = bounds.x = newBoundX;
+                            }else{
+                                var newBoundY = bounds.y - (keepAspectRatio ? dy : dy * 0.5);
+                                bounds.y = (bounds.height > minimumImageSize) ? newBoundY : limits.center.y;
+                                bounds.x = (bounds.width > minimumImageSize) ? newBoundX : limits.center.x;
                             }
+
                             break;
+
                         case 'bm':
+
                             bounds.height += dy;
+
                             if (keepAxis) {
-                                bounds.y -= dy;
+                                var newBoundY =  bounds.y - dy;
                                 bounds.height += dy;
+                                if (bounds.height < minimumImageSize){
+                                    newBoundY = limits.center.y;
+                                }
+                                bounds.y = newBoundY;
                             }
+
                             if (keepAspectRatio) {
-                                dy = keepAxis ? dy * 2 : dy;
-                                bounds.x -= dy * factorX * 0.5;
+                                dy = keepAxis ? dy*2 : dy;
+
+                                var newBoundX = bounds.x - (dy * factorX * 0.5);
+                                if (newBoundX > limits.topMiddle.x){
+                                    newBoundX = limits.topMiddle.x;
+                                }
+                                bounds.x = newBoundX;
+
                                 bounds.width += dy * factorX;
                             }
+
                             break;
+
                         case 'br':
+
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
                                 var fx = d == dx ? 1 : factorX;
@@ -1028,44 +1207,91 @@
                             bounds.width += dx;
                             bounds.height += dy;
                             if (keepAxis) {
-                                bounds.x -= dx * 0.5;
-                                bounds.y -= dy * 0.5;
+
+                                var newBoundX = (bounds.x - (dx * 0.5));
+                                var newBoundY = (bounds.y - (dy * 0.5));
+                                bounds.y = (bounds.height > minimumImageSize) ? newBoundY : limits.center.y;
+                                bounds.x = (bounds.width > minimumImageSize) ? newBoundX : limits.center.x;
+
                             }
                             break;
+
                         case 'ml':
-                            bounds.x += dx;
-                            bounds.width -= keepAxis ? dx * 2 : dx;
+
+                            var newBoundX = bounds.x + dx;
+                            if (!keepAxis && ((newBoundX + boundPadding) > limits.middleRight.x)){
+                                newBoundX = limits.middleRight.x - boundPadding;
+                            }else if (keepAxis && newBoundX > limits.center.x){
+                                newBoundX = limits.center.x;
+                            }
+                            bounds.x = newBoundX;
+
+                            bounds.width -= keepAxis ? dx*2 : dx;
+
                             if (keepAspectRatio) {
-                                dx = keepAxis ? dx * 2 : dx;
-                                bounds.y += dx * factorY * 0.5;
+                                dx = keepAxis ? dx*2 : dx;
+
+                                var newBoundY = bounds.y + (dx * factorY * 0.5);
+                                if (!keepAxis && (newBoundY > limits.middleRight.y)){
+                                    newBoundY = limits.middleRight.y;
+                                }else if (keepAxis && (newBoundY > limits.center.y)){
+                                    newBoundY = limits.center.y;
+                                }
+                                bounds.y = newBoundY;
+
                                 bounds.height -= dx * factorY;
                             }
                             break;
+
                         case 'mr':
-                            bounds.width += dx;
+
+                            bounds.width += (keepAxis) ? dx*2 : dx;
                             if (keepAxis) {
-                                bounds.x -= dx;
-                                bounds.width += dx;
+                                var newBoundX = bounds.x  - dx;
+                                if (bounds.width < minimumImageSize ){
+                                    newBoundX = limits.center.x - (boundPadding / 2);
+                                }
+                                bounds.x = newBoundX;
                             }
                             if (keepAspectRatio) {
-                                dx = keepAxis ? dx * 2 : dx;
-                                bounds.y -= dx * factorY * 0.5;
+                                dx = keepAxis ? dx*2 : dx;
+                                var newBoundY = bounds.y - (dx * factorY * 0.5);
+                                if (newBoundY > limits.middleLeft.y){
+                                    newBoundY = limits.middleLeft.y;
+                                }
+                                bounds.y = newBoundY;
                                 bounds.height += dx * factorY;
                             }
+
                             break;
                     }
-                    if (bounds.width < 10) {
-                        bounds.width = 10;
-                    }
-                    if (bounds.height < 10) {
-                        bounds.height = 10;
-                    }
+
+                    bounds.width = ((bounds.width < minimumImageSize) ? minimumImageSize : bounds.width);
+                    bounds.height = ((bounds.height < minimumImageSize) ? minimumImageSize : bounds.height);
 
                     updateResizeControls(evt.supportImageExt, selected);
-                    evt.supportImageExt.notify({type: 'resize'});
+                    evt.supportImageExt.notify({type:'resize'});
                 }
                 evtState.mousePosition = getMousePosition(evt);
             });
+        }
+
+        // Alterando o css dessa maneira porque mouseover e mouseout não são disparados pelo cytoscape para elementos do tipo supportimage
+        // e como o canvas é único para a imagem e os controles, é preciso aplicar o css para todo o body e realizar o controle manualmente
+        // de adição e remoção dos mesmos
+        function changePointerResizeControl(control){
+            var cssCursor = '';
+            switch(control){
+                case 'tl': cssCursor = 'nw-resize'; break;
+                case 'tm': cssCursor = 'n-resize'; break;
+                case 'tr': cssCursor = 'ne-resize'; break;
+                case 'bl': cssCursor = 'sw-resize'; break;
+                case 'bm': cssCursor = 's-resize'; break;
+                case 'br': cssCursor = 'se-resize'; break;
+                case 'ml': cssCursor = 'w-resize'; break;
+                case 'mr': cssCursor = 'e-resize'; break;
+            }
+            $('body *').css('cursor', cssCursor);
         }
 
         function updateResizeControls(supportImageExt, supportImage) {
@@ -1075,8 +1301,8 @@
             var h = supportImage.bounds.height;
 
             var resizeControls = supportImageExt.resizeControls();
-            var cw = 5 * 1 / supportImageExt._private.cy.zoom();
-            var ch = 5 * 1 / supportImageExt._private.cy.zoom();
+            var cw = 5 * 1/supportImageExt._private.cy.zoom();
+            var ch = 5 * 1/supportImageExt._private.cy.zoom();
             if (cw < 5) {
                 cw = 5;
             }
@@ -1084,21 +1310,65 @@
                 ch = 5;
             }
             // top-left
-            resizeControls[0].set(x - cw / 2, y - ch / 2, cw, ch);
+            resizeControls[0].set(x-cw/2, y-ch/2, cw, ch);
             // top-middle
-            resizeControls[1].set(x + w / 2 - cw / 2, y - ch / 2, cw, ch);
+            resizeControls[1].set(x+w/2-cw/2, y-ch/2, cw, ch);
             // top-right
-            resizeControls[2].set(x + w - cw / 2, y - ch / 2, cw, ch);
+            resizeControls[2].set(x+w-cw/2, y-ch/2, cw, ch);
             // bottom-left
-            resizeControls[3].set(x - cw / 2, y + h - ch / 2, cw, ch);
+            resizeControls[3].set(x-cw/2, y+h-ch/2, cw, ch);
             // bottom-middle
-            resizeControls[4].set(x + w / 2 - cw / 2, y + h - ch / 2, cw, ch);
+            resizeControls[4].set(x+w/2-cw/2, y+h-ch/2, cw, ch);
             // bottom-right
-            resizeControls[5].set(x + w - cw / 2, y + h - ch / 2, cw, ch);
+            resizeControls[5].set(x+w-cw/2, y+h-ch/2, cw, ch);
             // middle-left
-            resizeControls[6].set(x - cw / 2, y + h / 2 - ch / 2, cw, ch);
+            resizeControls[6].set(x-cw/2, y+h/2-ch/2, cw, ch);
             // middle-right
-            resizeControls[7].set(x + w - cw / 2, y + h / 2 - ch / 2, cw, ch);
+            resizeControls[7].set(x+w-cw/2, y+h/2-ch/2, cw, ch);
+        }
+
+        function findLimits(supportImageExt, imageInfo){
+
+            var x = imageInfo.x;
+            var y = imageInfo.y;
+            var h = imageInfo.h;
+            var w = imageInfo.w;
+
+            var cw = 5 * 1/supportImageExt._private.cy.zoom();
+            var ch = 5 * 1/supportImageExt._private.cy.zoom();
+            if (cw < 5) {
+                cw = 5;
+            }
+            if (ch < 5) {
+                ch = 5;
+            }
+
+            var limits = {
+                bottomRight : {},
+                bottomMiddle : {},
+                bottomLeft : {},
+                middleRight : {},
+                middleLeft : {},
+                topRight : {},
+                topLeft : {},
+                topBottom : {},
+                center : {}
+            }
+
+            limits.bottomRight = { x : (x+w-cw/2), y : (y+h-ch/2) };
+            limits.bottomMiddle = { x : (x+w/2-cw/2), y : (y+h-ch/2) };
+            limits.bottomLeft = { x : (x-cw/2), y : (y+h-ch/2) };
+
+            limits.middleRight = { x : (x+w-cw/2), y : (y+h/2-ch/2) };
+            limits.middleLeft = { x : (x-cw/2), y : (y+h/2-ch/2) };
+
+            limits.topRight = { x : (x+w-cw/2), y : (y-ch/2) };
+            limits.topMiddle = { x : (x+w/2-cw/2), y : (y-ch/2) };
+            limits.topLeft = { x : (x-cw/2), y : (y-ch/2) };
+
+            limits.center = { x : (x+w/2-cw/2), y : (y+h/2-ch/2) };
+
+            return limits;
         }
 
         function SupportImageExtension(options) {
@@ -1109,23 +1379,23 @@
 
             var RESIZE_CONTROLS = 8;
 
-            var baseControl = {x: 0, y: 0, width: 5, height: 5};
+            var baseControl = {x:0, y: 0, width:5, height:5};
             this._private = {
-                supportImages: [],
-                resizeControls: [],
-                cy: options.cy
+                supportImages : [],
+                resizeControls : [],
+                cy: options.cy,
+                evtState: {}
             };
 
-            var ids = ['tl', 'tm', 'tr', 'bl', 'bm', 'br', 'ml', 'mr'];
+            var ids = ['tl','tm','tr','bl','bm','br','ml','mr'];
             for (var i = 0; i < RESIZE_CONTROLS; i++) {
-                //FIXME
-                this.resizeControls().push(new Rectangle(extend(baseControl, {id: ids[i]})));
+                this.resizeControls().push(new Rectangle(extend(baseControl, {id:ids[i]})));
             }
 
-            init.apply(null, [this]);
+            init.apply(null,[this]);
         }
 
-        SupportImageExtension.prototype.load = function (json) {
+        SupportImageExtension.prototype.load = function(json) {
             if (typeof json === 'string') {
                 json = JSON.parse(json);
             }
@@ -1133,7 +1403,7 @@
             if (json.images) {
                 var imgs = json.images;
                 for (var i = 0; i < imgs.length; i++) {
-                    var img = new SupportImage(imgs[i]);
+                    var img = new SupportImage(this, imgs[i]);
                     this.images().push(img);
                 }
 
@@ -1144,23 +1414,36 @@
             }
         };
 
-        SupportImageExtension.prototype.render = function () {
+        SupportImageExtension.prototype.renderer = function () {
+            return this._private.renderer;
+        };
+
+        SupportImageExtension.prototype.destroy = function() {
+            this.renderer().destroy();
+
+        };
+
+        SupportImageExtension.prototype.rectangle = function(bounds) {
+            return new Rectangle(bounds);
+        };
+
+        SupportImageExtension.prototype.render = function() {
             var img = this.selectedImage();
             if (img) {
                 updateResizeControls(this, img);
             }
             this._private.renderer.notify({type: 'render'});
-        }
+        };
 
-        SupportImageExtension.prototype.resizeControls = function () {
+        SupportImageExtension.prototype.resizeControls = function() {
             return this._private.resizeControls;
         };
 
-        SupportImageExtension.prototype.images = function () {
+        SupportImageExtension.prototype.images = function() {
             return this._private.supportImages;
         };
 
-        SupportImageExtension.prototype.image = function (id) {
+        SupportImageExtension.prototype.image = function(id) {
             var imgs = this.images();
 
             var idx, len;
@@ -1171,15 +1454,26 @@
             return null;
         };
 
-        SupportImageExtension.prototype.notify = function (params) {
+        SupportImageExtension.prototype.notify = function(params) {
             var r = this._private.renderer;
 
             r.notify(params);
         };
 
-        SupportImageExtension.prototype.addSupportImage = function (img) {
+        SupportImageExtension.prototype.addSupportImage = function(img, isCenter) {
 
-            var supImg = new SupportImage(img);
+            var supImg = new SupportImage(this, img);
+
+            if(isCenter !== false){
+                // middle
+                var viewportMiddlePos = {
+                    x: (this._private.cy.extent().x1 + (this._private.cy.extent().w / 2)),
+                    y: (this._private.cy.extent().y1 + (this._private.cy.extent().h / 2)),
+                };
+
+                supImg.bounds.x = viewportMiddlePos.x;
+                supImg.bounds.y = viewportMiddlePos.y;
+            }
 
             this.images().push(supImg);
 
@@ -1188,7 +1482,7 @@
             return supImg;
         };
 
-        SupportImageExtension.prototype.removeSupportImage = function (img) {
+        SupportImageExtension.prototype.removeSupportImage = function(img) {
 
             var imgs = this.images();
 
@@ -1201,7 +1495,7 @@
             this._private.renderer.notify({type: 'remove', supportImage: img});
         };
 
-        SupportImageExtension.prototype.setImageLocked = function (img, locked) {
+        SupportImageExtension.prototype.setImageLocked = function(img, locked) {
 
             img.locked = locked;
 
@@ -1210,7 +1504,7 @@
             this._private.renderer.notify({type: 'changed', supportImage: img});
         };
 
-        SupportImageExtension.prototype.setImageVisible = function (img, visible) {
+        SupportImageExtension.prototype.setImageVisible = function(img, visible) {
 
             img.visible = visible;
 
@@ -1219,35 +1513,35 @@
             this._private.renderer.notify({type: 'changed', supportImage: img});
         };
 
-        SupportImageExtension.prototype.moveImageUp = function (img) {
+        SupportImageExtension.prototype.moveImageUp = function(img) {
 
             var imgs = this.images();
             for (var i = 1; i < imgs.length; i++) {
                 var curr = imgs[i];
                 if (curr.id == img.id) {
-                    imgs[i] = imgs[i - 1];
-                    imgs[i - 1] = curr;
+                    imgs[i] = imgs[i-1];
+                    imgs[i-1] = curr;
                     break;
                 }
             }
             this._private.renderer.notify({type: 'changed', supportImage: img});
         };
 
-        SupportImageExtension.prototype.moveImageDown = function (img) {
+        SupportImageExtension.prototype.moveImageDown = function(img) {
 
             var imgs = this.images();
             for (var i = 0; i < imgs.length - 1; i++) {
                 var curr = imgs[i];
                 if (curr.id == img.id) {
-                    imgs[i] = imgs[i + 1];
-                    imgs[i + 1] = curr;
+                    imgs[i] = imgs[i+1];
+                    imgs[i+1] = curr;
                     break;
                 }
             }
             this._private.renderer.notify({type: 'changed', supportImage: img});
         };
 
-        SupportImageExtension.prototype.selectedImage = function () {
+        SupportImageExtension.prototype.selectedImage = function() {
             var imgs = this.images();
 
             var idx, len;
@@ -1258,34 +1552,51 @@
             return null;
         };
 
-        SupportImageExtension.prototype.selectImage = function (img) {
-            if (img.locked || !img.visible) return;
+        SupportImageExtension.prototype.selectImage = function(img) {
+            if (img.locked || !img.visible || img.selected()) return;
 
             var imgs = this.images();
+            var cy = this._private.cy;
 
             var idx, len;
             for (idx = 0, len = imgs.length; idx < len; ++idx) {
                 var image = imgs[idx];
+                var selected = image.selected();
                 image.selected(false);
+                image.dragging(false);
+                if (selected) {
+                    cy.trigger('cysupportimages.imagedeselected', [image]);
+                }
             }
+            img.dragging(false);
             img.selected(true);
             updateResizeControls(this, img);
             this._private.renderer.notify({type: 'selection'});
+            this._private.evtState.image = img;
+            this._private.evtState.imgBounds = extend({}, img.bounds);
+            cy.trigger('cysupportimages.imageselected', [img]);
         };
 
-        SupportImageExtension.prototype.clearSelection = function () {
+        SupportImageExtension.prototype.clearSelection = function() {
 
             var imgs = this.images();
+            var cy = this._private.cy;
 
             var idx, len;
             for (idx = 0, len = imgs.length; idx < len; ++idx) {
-                imgs[idx].selected(false);
+                var img = imgs[idx];
+                var selected = img.selected();
+                img.selected(false);
+                img.dragging(false);
+                if (selected) {
+                    cy.trigger('cysupportimages.imagedeselected', [img]);
+                }
             }
 
             this._private.renderer.notify({type: 'selection'});
         };
 
-        SupportImageExtension.prototype.json = function () {
+        SupportImageExtension.prototype.json = function() {
             var imgs = [];
             var images = this.images();
             for (var i = 0; i < images.length; i++) {
@@ -1304,13 +1615,11 @@
     })();
 
     // registers the extension on a cytoscape lib ref
-    var register = function (cytoscape) {
-        if (!cytoscape) {
-            return;
-        } // can't register if cytoscape unspecified
+    var register = function( cytoscape ){
+        if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
         // if you want a core extension
-        cytoscape('core', 'supportimages', function (options) { // could use options object, but args are up to you
+        cytoscape('core', 'supportimages', function( options ){ // could use options object, but args are up to you
             var cy = this;
 
             if (cy._private.supportImageCore) {
@@ -1327,18 +1636,18 @@
 
     };
 
-    if (typeof module !== 'undefined' && module.exports) { // expose as a commonjs module
+    if( typeof module !== 'undefined' && module.exports ){ // expose as a commonjs module
         module.exports = register;
     }
 
-    if (typeof define !== 'undefined' && define.amd) { // expose as an amd/requirejs module
-        define('cytoscape-supportimages', function () {
+    if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
+        define('cytoscape-supportimages', function(){
             return register;
         });
     }
 
-    if (typeof cytoscape !== 'undefined') { // expose to global cytoscape (i.e. window.cytoscape)
-        register(cytoscape);
+    if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
+        register( cytoscape );
     }
 
 })();

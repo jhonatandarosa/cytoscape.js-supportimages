@@ -83,6 +83,12 @@
 				refreshImages();
 			}
 
+            function select(id) {
+                var si = cy.supportimages();
+                var img = si.image(id);
+                si.selectImage(img);
+            }
+
 			function refreshImages() {
 				var si = cy.supportimages();
 				var imgs = si.images();
@@ -94,10 +100,11 @@
 					html += "(" + img.url + ")";
 					html += "<button onclick='changeLock(\""+img.id+"\")'>";
 					html += img.locked ? "Unlock" : "Lock";
-					html += "</button>"
+					html += "</button>";
 					html += "<button onclick='changeVisibility(\""+img.id+"\")'>";
 					html += img.visible ? "Hide" : "Show";
 					html += "</button>";
+                    html += "<button onclick='select(\""+img.id+"\")'>Select</button>";
 
 					if (i > 0) {
 						html += "<button onclick='moveUp(\""+img.id+"\")'>Move Up</button>";
@@ -180,6 +187,11 @@
 
 				// init the plugin
 				cy.supportimages();
+                cy.on('cysupportimages.*', function (evt) {
+                    var html = $('#events').html();
+                    html = '<p>' + evt.type + evt.namespace + '</p>' + html;
+                    $('#events').html(html);
+                });
 
 				cy.supportimages().addSupportImage({
 					name: 'jquery',
@@ -203,6 +215,9 @@
 			</div>
 			<div id="images">
 			</div>
+            Eventos:
+            <div id="events">
+            </div>
 		</div>
 
 	</body>
