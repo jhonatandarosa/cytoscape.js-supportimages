@@ -4,7 +4,7 @@ cytoscape-supportimages
 
 ## Description
 
-A plugin that enables support images on cytoscape.js
+A plugin that enables support images on cytoscape.js -- [Demo](https://codepen.io/ninadpchaudhari/pen/rdWMJE)
 
 Available functionalities:
  * add image
@@ -18,7 +18,7 @@ Available functionalities:
 
 ## Dependencies
 
- * Cytoscape.js >=2.3.8
+ * Cytoscape.js >=2.3.8 && <=2.6.12
 
 ## Usage instructions
 
