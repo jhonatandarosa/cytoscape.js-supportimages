@@ -18,7 +18,7 @@ Available functionalities:
 
 ## Dependencies
 
- * Cytoscape.js >=2.3.8 && <=2.6.12
+ * Cytoscape.js >= 2.3.8
 
 ## Usage instructions
 
