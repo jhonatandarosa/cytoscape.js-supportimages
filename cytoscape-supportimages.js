@@ -114,7 +114,7 @@
                 maxWait = false,
                 trailing = true;
 
-            if (typeof func != 'function') {
+            if (typeof func !== 'function') {
                 throw new TypeError(FUNC_ERROR_TEXT);
             }
             wait = wait < 0 ? 0 : (+wait || 0);
@@ -235,7 +235,7 @@
             // Avoid a V8 JIT bug in Chrome 19-20.
             // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
             var type = typeof value;
-            return !!value && (type == 'object' || type == 'function');
+            return !!value && (type === 'object' || type === 'function');
         }
 
         return debounce;
@@ -289,7 +289,7 @@
                 x     : this.x,
                 y     : this.y,
                 width : this.width,
-                height: this.height,
+                height: this.height
             });
         }
         // Allow instantiation without the 'new' keyword
@@ -318,7 +318,7 @@
     };
 
     Rectangle.prototype.equals = function(rect) {
-        return this.x == rect.x && this.y == rect.y && this.width == rect.width && this.height == rect.height;
+        return this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height;
     };
 
     // Support Image class
@@ -329,7 +329,7 @@
         }
         function guid() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+                var r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
                 return v.toString(16);
             });
         }
@@ -426,8 +426,7 @@
                 x     : this.bounds.x,
                 y     : this.bounds.y,
                 width : this.bounds.width,
-                height: this.bounds.height,
-
+                height: this.bounds.height
             }
         };
     };
@@ -508,7 +507,8 @@
     };
 
     SupportImageCanvasRenderer.prototype.load = function() {
-        //console.log('load');
+        this.invalidateContainerClientCoordsCache();
+        this.matchCanvasSize(this.data.container);
     };
 
     SupportImageCanvasRenderer.prototype.projectIntoViewport = function(clientX, clientY) {
@@ -565,7 +565,6 @@
         var pixelRatio = this.getPixelRatio();
         var canvasWidth = width * pixelRatio;
         var canvasHeight = height * pixelRatio;
-        var canvas;
 
         if (canvasWidth === this.canvasWidth && canvasHeight === this.canvasHeight) {
             return;
@@ -742,13 +741,14 @@
                 if (evt.isPropagationStopped && evt.isPropagationStopped()) return;
 
                 evt.supportImageExt = supportImageExt;
-                if (evt.cyTarget !== evt.cy) { // is not the core
+                var target = evt.cyTarget ? evt.cyTarget : evt.target;
+                if (target !== evt.cy) { // is not the core
                     return handler(evt);
                 }
 
                 var supportImages = supportImageExt.images();
                 var resizeControls = supportImageExt.resizeControls();
-                var pos = evt.cyPosition;
+                var pos = evt.cyPosition ? evt.cyPosition : evt.position;
 
                 if (supportImageExt.selectedImage()){
                     var idx, len;
@@ -825,11 +825,7 @@
         function registerMouseHandlers(supportImageExt) {
 
             function getMousePosition(evt) {
-                //console.log(evt);
-                return {
-                    x: evt.cyRenderedPosition.x,
-                    y: evt.cyRenderedPosition.y
-                };
+                return evt.cyRenderedPosition ? evt.cyRenderedPosition : evt.renderedPosition;
             }
             var evtState = supportImageExt._private.evtState;
 
@@ -916,8 +912,6 @@
                     evtState.resizeControl = null;
                 }
 
-                // console.log('mouse down');
-                // console.log(image);
             });
 
             bindEvent(supportImageExt, 'mouseup', function(evt, item) {
@@ -927,9 +921,6 @@
                 changePointerResizeControl('');
 
                 restoreCytoscapeState(cy);
-
-                console.log('mouse up');
-                console.log(evtState.image);
 
                 if (evtState.image) {
                     evtState.image.dragging(false);
@@ -981,7 +972,6 @@
                 }
 
                 if (evtState.image && evtState.image.dragging()) {
-                    // evtState.image.dragging(true);
 
                     var lastMousePos = evtState.mousePosition;
                     var currMousePos = getMousePosition(evt);
@@ -1012,7 +1002,7 @@
                     var keepAspectRatio = evt.originalEvent.ctrlKey;
                     var keepAxis = evt.originalEvent.shiftKey;
 
-                    if (evtState.imageState.ctrlKey != keepAspectRatio){
+                    if (evtState.imageState.ctrlKey !== keepAspectRatio){
                         evtState.imageState.ctrlKey = keepAspectRatio;
                         evtState.imageState.width = bounds.width;
                         evtState.imageState.height = bounds.height;
@@ -1020,7 +1010,7 @@
                         evtState.imageState.y = bounds.y;
                     }
 
-                    if (evtState.imageState.shiftKey != keepAxis){
+                    if (evtState.imageState.shiftKey !== keepAxis){
                         evtState.imageState.shiftKey = keepAxis;
                         evtState.imageState.width = bounds.width;
                         evtState.imageState.height = bounds.height;
@@ -1054,8 +1044,8 @@
 
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
-                                var fx = d == dx ? 1 : factorX;
-                                var fy = d == dy ? 1 : factorY;
+                                var fx = d === dx ? 1 : factorX;
+                                var fy = d === dy ? 1 : factorY;
 
                                 dx = d * fx;
                                 dy = d * fy;
@@ -1114,8 +1104,8 @@
 
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
-                                var fx = d == dx ? 1 : -factorX;
-                                var fy = d == dy ? 1 : -factorY;
+                                var fx = d === dx ? 1 : -factorX;
+                                var fy = d === dy ? 1 : -factorY;
 
                                 dx = d * fx;
                                 dy = d * fy;
@@ -1143,8 +1133,8 @@
 
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
-                                var fx = d == dx ? 1 : -factorX;
-                                var fy = d == dy ? 1 : -factorY;
+                                var fx = d === dx ? 1 : -factorX;
+                                var fy = d === dy ? 1 : -factorY;
 
                                 dx = d * fx;
                                 dy = d * fy;
@@ -1198,8 +1188,8 @@
 
                             if (keepAspectRatio) {
                                 var d = dx > 0 ? Math.max(dx, dy) : dx < 0 ? Math.min(dx, dy) : dy;
-                                var fx = d == dx ? 1 : factorX;
-                                var fy = d == dy ? 1 : factorY;
+                                var fx = d === dx ? 1 : factorX;
+                                var fy = d === dy ? 1 : factorY;
 
                                 dx = d * fx;
                                 dy = d * fy;
@@ -1301,8 +1291,8 @@
             var h = supportImage.bounds.height;
 
             var resizeControls = supportImageExt.resizeControls();
-            var cw = 5 * 1/supportImageExt._private.cy.zoom();
-            var ch = 5 * 1/supportImageExt._private.cy.zoom();
+            var cw = 5 * (1/supportImageExt._private.cy.zoom());
+            var ch = 5 * (1/supportImageExt._private.cy.zoom());
             if (cw < 5) {
                 cw = 5;
             }
@@ -1334,8 +1324,8 @@
             var h = imageInfo.h;
             var w = imageInfo.w;
 
-            var cw = 5 * 1/supportImageExt._private.cy.zoom();
-            var ch = 5 * 1/supportImageExt._private.cy.zoom();
+            var cw = 5 * (1/supportImageExt._private.cy.zoom());
+            var ch = 5 * (1/supportImageExt._private.cy.zoom());
             if (cw < 5) {
                 cw = 5;
             }
@@ -1449,7 +1439,7 @@
             var idx, len;
             for (idx = 0, len = imgs.length; idx < len; ++idx) {
                 var image = imgs[idx];
-                if (image.id == id) return image;
+                if (image.id === id) return image;
             }
             return null;
         };
@@ -1468,7 +1458,7 @@
                 // middle
                 var viewportMiddlePos = {
                     x: (this._private.cy.extent().x1 + (this._private.cy.extent().w / 2)),
-                    y: (this._private.cy.extent().y1 + (this._private.cy.extent().h / 2)),
+                    y: (this._private.cy.extent().y1 + (this._private.cy.extent().h / 2))
                 };
 
                 supImg.bounds.x = viewportMiddlePos.x;
@@ -1518,7 +1508,7 @@
             var imgs = this.images();
             for (var i = 1; i < imgs.length; i++) {
                 var curr = imgs[i];
-                if (curr.id == img.id) {
+                if (curr.id === img.id) {
                     imgs[i] = imgs[i-1];
                     imgs[i-1] = curr;
                     break;
@@ -1532,7 +1522,7 @@
             var imgs = this.images();
             for (var i = 0; i < imgs.length - 1; i++) {
                 var curr = imgs[i];
-                if (curr.id == img.id) {
+                if (curr.id === img.id) {
                     imgs[i] = imgs[i+1];
                     imgs[i+1] = curr;
                     break;
