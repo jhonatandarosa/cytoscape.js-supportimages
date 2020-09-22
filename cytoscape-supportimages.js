@@ -168,7 +168,7 @@
             function debounced() {
                 args = arguments;
                 stamp = now();
-                thisArg = this;
+                thisArg = this; // jshint ignore:line
                 trailingCall = trailing && (timeoutId || !leading);
 
                 if (maxWait === false) {
@@ -902,7 +902,7 @@
                             y : evt.supportImageExt.selectedImage().bounds.y,
                             ctrlKey : evt.originalEvent.ctrlKey,
                             shiftKey : evt.originalEvent.shiftKey
-                        }
+                        };
                     } else {
                         console.error('Unknown object detected: ' + item);
                     }
@@ -1343,7 +1343,7 @@
                 topLeft : {},
                 topBottom : {},
                 center : {}
-            }
+            };
 
             limits.bottomRight = { x : (x+w-cw/2), y : (y+h-ch/2) };
             limits.bottomMiddle = { x : (x+w/2-cw/2), y : (y+h-ch/2) };
