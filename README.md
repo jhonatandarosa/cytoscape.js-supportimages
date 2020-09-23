@@ -10,6 +10,8 @@ Available functionalities:
  * add image
  * remove image
  * list images
+ * set image height and width
+ * set image position
  * change drawing order
  * change visibility
  * change locking (can be selected or moved)
@@ -55,10 +57,19 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 // init/get the extension
 var si = cy.supportimages();
 
+// create rectangle object to set image position, width, and height
+var bounds = si.rectangle({
+	x: x,
+	y: y,
+	width: width,
+	height: height,
+});
+
 // add a support image
 si.addSupportImage({
 	url: 'yourimageurl',
-	name: 'yourimagename'
+	name: 'yourimagename',
+	bounds: bounds,
 });
 
 // list images
