@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cytoscape.js-supportimages.git"
+    "url": "https://github.com/harrisonmiller/cytoscape.js-supportimages.git"
   },
   "keywords": [
     "cytoscape",
@@ -16,9 +16,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cytoscape.js-supportimages/issues"
+    "url": "https://github.com/harrisonmiller/cytoscape.js-supportimages/issues"
   },
-  "homepage": "https://github.com/cytoscape.js-supportimages",
+  "homepage": "https://github.com/harrisonmiller/cytoscape.js-supportimages",
   "devDependencies": {
     "gulp": "^3.8.10",
     "gulp-jshint": "^1.9.2",
