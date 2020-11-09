@@ -594,21 +594,38 @@
     };
 
 
-    SupportImageCanvasRenderer.prototype.getCachedImage = function(url, onLoad) {
+    SupportImageCanvasRenderer.prototype.getCachedImage = function(supportImage, onLoad) {
         var r = this;
+
         var imageCache = r.imageCache = r.imageCache || {};
+        var url = supportImage.url;
+        var id = supportImage.id;
 
         if (imageCache[url] && imageCache[url].image) {
             return imageCache[url].image;
+        } else if(imageCache[id] && imageCache[id].video) {
+            return imageCache[id].video;
         }
 
-        var cache = imageCache[url] = imageCache[url] || {};
+        var video_exts = ['mp4', 'webm'];
+        var isVideo = video_exts.indexOf(url.slice(-3)) > -1 ? true : false;
 
-        var image = cache.image = new Image();
-        image.addEventListener('load', onLoad);
-        image.src = url;
-
-        return image;
+        if (isVideo) {
+          var cache = imageCache[id] = imageCache[id] || {};
+          var video = cache.video = document.createElement("video");
+          video.addEventListener('loadedmetadata', onLoad);
+          video.src = url;
+          video.autoplay = true;
+          video.loop = true;
+          video.muted = true;
+          return video;
+        } else {
+          var cache = imageCache[url] = imageCache[url] || {};
+          var image = cache.image = new Image();
+          image.addEventListener('load', onLoad);
+          image.src = url;
+          return image;
+        }
     };
 
 
@@ -668,7 +685,7 @@
         for (var idx = supportImages.length - 1; idx >= 0; --idx) {
             var image = supportImages[idx];
             if (image.visible) {
-                this.drawSupportImage(context, image);
+              this.drawSupportImage(context, image);
             }
         }
 
@@ -693,7 +710,7 @@
         var r = this;
 
         // get image, and if not loaded then ask to redraw when later loaded
-        var img = this.getCachedImage(supportImage.url, function(evt) {
+        var img = this.getCachedImage(supportImage, function(evt) {
             var resource = evt.currentTarget;
             var w = resource.width;
             var h = resource.height;
@@ -701,10 +718,24 @@
             supportImage.resourceH = h;
             supportImage.bounds.width = supportImage.bounds.width || w;
             supportImage.bounds.height = supportImage.bounds.height || h;
+
+            if(img.readyState >= 0){
+              img.addEventListener('canplaythrough', function(){
+                img.play();
+              });
+
+              function animateFrames(){
+                context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
+                requestAnimationFrame(animateFrames);
+              }
+
+              animateFrames();
+            }
+
             r.redraw();
         });
 
-        if (img.complete) {
+        if (img.complete || img.readyState >= 0) {
             if (!supportImage.bounds.width) {
                 supportImage.bounds.width = img.width;
             }
@@ -715,7 +746,7 @@
             var y = supportImage.bounds.y;
             var w = supportImage.bounds.width;
             var h = supportImage.bounds.height;
-            context.drawImage(img, 0, 0, img.width, img.height, x, y, w, h);
+            if(img.complete){ context.drawImage(img, 0, 0, img.width, img.height, x, y, w, h); }
 
             if (supportImage.selected()) {
                 context.beginPath();
@@ -725,7 +756,6 @@
                 this.drawResizeControls(context, supportImage);
             }
         }
-
     };
 
 
@@ -1461,8 +1491,9 @@
                     y: (this._private.cy.extent().y1 + (this._private.cy.extent().h / 2))
                 };
 
-                supImg.bounds.x = viewportMiddlePos.x;
-                supImg.bounds.y = viewportMiddlePos.y;
+                // COMMENTED OUT THESE TWO LINES SO OUR SPECIFIED X AND Y IS THE POSITION OF IMAGES ON THE GRAPH
+                // supImg.bounds.x = viewportMiddlePos.x;
+                // supImg.bounds.y = viewportMiddlePos.y;
             }
 
             this.images().push(supImg);
@@ -1611,7 +1642,6 @@
         // if you want a core extension
         cytoscape('core', 'supportimages', function( options ){ // could use options object, but args are up to you
             var cy = this;
-
             if (cy._private.supportImageCore) {
                 return cy._private.supportImageCore;
             } else {
