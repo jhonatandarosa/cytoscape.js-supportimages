@@ -607,7 +607,7 @@
             return imageCache[id].video;
         }
 
-        var video_exts = ['mp4', 'webm'];
+        var video_exts = ['mp4', 'webm', 'ogg'];
         var isVideo = video_exts.indexOf(url.slice(-3)) > -1 ? true : false;
 
         if (isVideo) {
@@ -1311,7 +1311,7 @@
                 case 'ml': cssCursor = 'w-resize'; break;
                 case 'mr': cssCursor = 'e-resize'; break;
             }
-            $('body *').css('cursor', cssCursor);
+            document.body.style.cursor = cssCursor;
         }
 
         function updateResizeControls(supportImageExt, supportImage) {
