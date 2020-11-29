@@ -725,7 +725,15 @@
               });
 
               function animateFrames(){
-                context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
+                if(supportImage.selected()){
+                  context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
+                  context.beginPath();
+                  context.rect(supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
+                  context.stroke();
+                  r.drawResizeControls(context, supportImage);
+                } else {
+                  context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
+                }
                 requestAnimationFrame(animateFrames);
               }
 
@@ -735,7 +743,7 @@
             r.redraw();
         });
 
-        if (img.complete || img.readyState >= 0) {
+        if (img.complete) {
             if (!supportImage.bounds.width) {
                 supportImage.bounds.width = img.width;
             }
@@ -746,7 +754,7 @@
             var y = supportImage.bounds.y;
             var w = supportImage.bounds.width;
             var h = supportImage.bounds.height;
-            if(img.complete){ context.drawImage(img, 0, 0, img.width, img.height, x, y, w, h); }
+            context.drawImage(img, 0, 0, img.width, img.height, x, y, w, h);
 
             if (supportImage.selected()) {
                 context.beginPath();
