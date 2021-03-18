@@ -4,7 +4,7 @@ cytoscape-supportimages
 
 ## Description
 
-A plugin that enables support images on cytoscape.js -- [Demo](https://codepen.io/ninadpchaudhari/pen/rdWMJE)
+A plugin that enables support images and videos on cytoscape.js.  Supported video types are mp4, webm, and ogg. -- [Demo](https://codepen.io/ninadpchaudhari/pen/rdWMJE)
 
 Available functionalities:
  * add image
