@@ -734,7 +734,12 @@
                 } else {
                   context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
                 }
-                requestAnimationFrame(animateFrames);
+
+                if(r.data.supportImageExt._private.supportImages.some(img => img.id === supportImage.id)){
+                  requestAnimationFrame(animateFrames);
+                } else {
+                  r.redraw();
+                }
               }
 
               animateFrames();
