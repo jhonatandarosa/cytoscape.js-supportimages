@@ -735,7 +735,7 @@
                   context.drawImage(img, supportImage.bounds.x, supportImage.bounds.y, supportImage.bounds.width, supportImage.bounds.height);
                 }
 
-                if(r.data.supportImageExt._private.supportImages.some(img => img.id === supportImage.id)){
+                if(r.data.supportImageExt._private.supportImages.length !== 0){
                   requestAnimationFrame(animateFrames);
                 } else {
                   r.redraw();
